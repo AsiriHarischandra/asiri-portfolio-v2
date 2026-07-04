@@ -83,6 +83,7 @@ export default function SettingsPanel() {
           linkedinUrl: form.linkedinUrl,
           email: form.email,
           avatarUrl: form.avatarUrl,
+          avatarBadge: form.avatarBadge,
           availability: form.availability,
         }),
       });
@@ -116,6 +117,7 @@ export default function SettingsPanel() {
         <Field label="University" field="university" form={form} set={set} />
         <Field label="Location" field="location" form={form} set={set} />
         <Field label="Availability status" field="availability" form={form} set={set} />
+        <Field label="Avatar badge (e.g. UoM · CS)" field="avatarBadge" form={form} set={set} />
         <Field label="Bio" field="bio" rows={4} form={form} set={set} />
 
         {/* Avatar upload */}

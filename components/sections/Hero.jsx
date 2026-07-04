@@ -144,7 +144,7 @@ export default function Hero({ settings, updates }) {
               </div>
               {/* Badge */}
               <span className="absolute -bottom-1 -right-3 font-mono text-[10px] text-lime bg-bg3 border border-lime/40 rounded-lg px-2 py-1">
-                UoM · CS
+                {s.avatarBadge || 'UoM · CS'}
               </span>
             </div>
           </div>

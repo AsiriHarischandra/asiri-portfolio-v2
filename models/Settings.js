@@ -10,6 +10,7 @@ const SettingsSchema = new mongoose.Schema({
   linkedinUrl:  { type: String, default: '' },
   email:        { type: String, default: '' },
   avatarUrl:    { type: String, default: '' },
+  avatarBadge:  { type: String, default: 'UoM · CS' },
   availability: { type: String, default: 'open to internships' },
 }, { timestamps: true });
 
