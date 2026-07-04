@@ -26,6 +26,7 @@ export default function SettingsPanel() {
   const [form, setForm]         = useState(null);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
+  const [error, setError]       = useState('');
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -67,8 +68,9 @@ export default function SettingsPanel() {
   const save = async () => {
     setSaving(true);
     setSaved(false);
+    setError('');
     try {
-      await fetch('/api/admin/settings', {
+      const res = await fetch('/api/admin/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -84,8 +86,23 @@ export default function SettingsPanel() {
           availability: form.availability,
         }),
       });
+
+      if (!res.ok) {
+        // Surface the real reason instead of a false "Saved".
+        let msg = `Save failed (${res.status})`;
+        if (res.status === 401) msg = 'Session expired — log in again.';
+        else {
+          const data = await res.json().catch(() => null);
+          if (data?.error) msg = data.error;
+        }
+        setError(msg);
+        return;
+      }
+
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+    } catch {
+      setError('Network error — could not reach the server.');
     } finally { setSaving(false); }
   };
 
@@ -126,6 +143,7 @@ export default function SettingsPanel() {
             <Save size={13} /> {saving ? 'Saving...' : 'Save settings'}
           </button>
           {saved && <span className="font-mono text-xs text-em">Saved — site updated.</span>}
+          {error && <span className="font-mono text-xs text-red-400">{error}</span>}
         </div>
       </div>
     </div>
