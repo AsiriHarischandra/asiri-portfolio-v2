@@ -7,6 +7,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Must run per-request: the signature embeds a fresh timestamp that expires.
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const timestamp = Math.round(Date.now() / 1000);

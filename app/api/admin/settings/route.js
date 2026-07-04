@@ -4,6 +4,10 @@ import { dbConnect } from '@/lib/db';
 import Settings from '@/models/Settings';
 import { validate, settingsSchema } from '@/lib/validation';
 
+// Force dynamic: without this, Next statically optimizes the GET-only view of
+// this route in production, which makes PUT return 405 Method Not Allowed.
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   await dbConnect();
   let settings = await Settings.findOne();
