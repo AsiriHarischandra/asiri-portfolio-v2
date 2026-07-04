@@ -7,6 +7,7 @@ const BlogSchema = new mongoose.Schema({
   category:   String,
   excerpt:    String,
   coverImage: String,
+  mediumUrl:  String,
   published:  { type: Boolean, default: false },
   slug:       { type: String, unique: true },
 }, { timestamps: true });

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Save, X, Eye } from 'lucide-react';
 
-const EMPTY = { title: '', content: '', category: '', excerpt: '', coverImage: '', published: false };
+const EMPTY = { title: '', content: '', category: '', excerpt: '', coverImage: '', mediumUrl: '', published: false };
 
 export default function BlogPanel() {
   const [posts, setPosts]     = useState([]);
@@ -69,6 +69,9 @@ export default function BlogPanel() {
           </div>
 
           <input placeholder="Excerpt (short description)" value={form.excerpt} onChange={set('excerpt')}
+            className="w-full bg-white/5 border border-em/20 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-em" />
+
+          <input placeholder="Medium article URL (optional)" value={form.mediumUrl} onChange={set('mediumUrl')}
             className="w-full bg-white/5 border border-em/20 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-em" />
 
           {/* Markdown editor */}

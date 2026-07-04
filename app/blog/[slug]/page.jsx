@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { getBlogPost, getAllBlogSlugs, readingTime, serialize } from '@/lib/data';
 
 export const revalidate = 60;
@@ -56,6 +56,17 @@ export default async function BlogPostPage({ params }) {
           {' · '}
           {time} min read
         </div>
+
+        {post.mediumUrl && (
+          <a
+            href={post.mediumUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 font-mono text-xs text-em border border-em/30 rounded-lg px-3 py-2 hover:bg-em/10 hover:text-lime transition mb-10"
+          >
+            <ExternalLink size={13} /> Read this on Medium
+          </a>
+        )}
 
         <div className="prose prose-invert prose-emerald prose-sm max-w-none
           prose-headings:font-display prose-headings:font-bold
