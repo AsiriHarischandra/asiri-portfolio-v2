@@ -25,11 +25,11 @@ export default async function Home() {
     <main>
       <Navbar />
       <Hero settings={serialize(settings)} updates={serializeMany(updates)} />
-      <About settings={serialize(settings)} />
-      <Education />
+      <About settings={serialize(settings)} projectsCount={projects.length} />
+      <Education settings={serialize(settings)} />
       <Projects projects={serializeMany(projects)} />
       <Updates updates={serializeMany(updates)} />
-      <TechStack />
+      <TechStack settings={serialize(settings)} />
       <Blog posts={serializeMany(posts)} />
       <Contact />
       <Footer settings={serialize(settings)} />

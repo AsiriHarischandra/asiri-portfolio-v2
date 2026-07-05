@@ -12,6 +12,12 @@ const SettingsSchema = new mongoose.Schema({
   avatarUrl:    { type: String, default: '' },
   avatarBadge:  { type: String, default: 'UoM · CS' },
   availability: { type: String, default: 'open to internships' },
+
+  // Editable section content (fall back to lib/defaults.js when empty)
+  skills:    [{ _id: false, name: String, level: Number }],
+  interests: [String],
+  techStack: [{ _id: false, name: String, category: String }],
+  education: [{ _id: false, period: String, title: String, subtitle: String }],
 }, { timestamps: true });
 
 export default mongoose.models.Settings || mongoose.model('Settings', SettingsSchema);
