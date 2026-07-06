@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Save, Upload, Plus, Trash2 } from 'lucide-react';
+import { Save, Upload, Plus, Trash2, Crop } from 'lucide-react';
+import AvatarCropModal from '@/components/admin/AvatarCropModal';
+import { readFileAsDataURL } from '@/lib/cropImage';
+import { uploadToCloudinary } from '@/lib/cloudinaryUpload';
 import {
   DEFAULT_SKILLS,
   DEFAULT_INTERESTS,
@@ -149,6 +152,11 @@ export default function SettingsPanel() {
   const [saved, setSaved]       = useState(false);
   const [error, setError]       = useState('');
   const [uploading, setUploading] = useState(false);
+  const [cropSrc, setCropSrc]     = useState(null);
+  const [cropLoading, setCropLoading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  // True when cropSrc is an object URL that must be revoked on close.
+  const cropSrcIsObjectUrl = useRef(false);
 
   useEffect(() => {
     fetch('/api/admin/settings').then(r => r.json()).then(data => {
@@ -169,29 +177,63 @@ export default function SettingsPanel() {
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
   const setArr = (field) => (value) => setForm({ ...form, [field]: value });
 
-  const uploadAvatar = async (e) => {
+  const closeCrop = () => {
+    if (cropSrcIsObjectUrl.current && cropSrc) URL.revokeObjectURL(cropSrc);
+    cropSrcIsObjectUrl.current = false;
+    setCropSrc(null);
+  };
+
+  const onFileSelect = async (e) => {
     const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-picking the same file
     if (!file) return;
-    setUploading(true);
+    setUploadError('');
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Please choose an image file.');
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      setUploadError('Image is too large (max 15MB).');
+      return;
+    }
     try {
-      const sigRes = await fetch('/api/upload-signature');
-      const sig = await sigRes.json();
+      const dataUrl = await readFileAsDataURL(file);
+      cropSrcIsObjectUrl.current = false;
+      setCropSrc(dataUrl);
+    } catch {
+      setUploadError('Could not read that file — try another one.');
+    }
+  };
 
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('api_key', sig.apiKey);
-      fd.append('timestamp', sig.timestamp);
-      fd.append('signature', sig.signature);
-      fd.append('folder', sig.folder);
+  // Re-open the cropper on the already-uploaded photo. Fetch → object URL
+  // (instead of crossOrigin on <img>) so the canvas can never be tainted
+  // by a cached non-CORS response.
+  const adjustExisting = async () => {
+    if (!form.avatarUrl) return;
+    setUploadError('');
+    setCropLoading(true);
+    try {
+      const res = await fetch(form.avatarUrl);
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      cropSrcIsObjectUrl.current = true;
+      setCropSrc(URL.createObjectURL(blob));
+    } catch {
+      setUploadError('Could not load current photo — upload a new one.');
+    } finally {
+      setCropLoading(false);
+    }
+  };
 
-      const uploadRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-        { method: 'POST', body: fd }
-      );
-      const data = await uploadRes.json();
-      setForm({ ...form, avatarUrl: data.secure_url });
+  const handleCropConfirm = async (blob) => {
+    closeCrop();
+    setUploading(true);
+    setUploadError('');
+    try {
+      const url = await uploadToCloudinary(blob, 'avatar.jpg');
+      setForm((f) => ({ ...f, avatarUrl: url }));
     } catch (err) {
-      console.error('Avatar upload failed:', err);
+      setUploadError(err.message || 'Upload failed — try again.');
     } finally {
       setUploading(false);
     }
@@ -245,6 +287,10 @@ export default function SettingsPanel() {
 
   return (
     <div>
+      {cropSrc && (
+        <AvatarCropModal src={cropSrc} onCancel={closeCrop} onConfirm={handleCropConfirm} />
+      )}
+
       <h2 className="font-display text-xl font-bold mb-6">Settings</h2>
 
       <div className="bg-white/[0.04] border border-em/20 rounded-xl p-5 space-y-4 max-w-xl">
@@ -259,16 +305,43 @@ export default function SettingsPanel() {
         {/* Avatar upload */}
         <div>
           <label className="font-mono text-[10px] text-gray-500 uppercase tracking-wider mb-1 block">Avatar</label>
-          <div className="flex items-center gap-3">
-            {form.avatarUrl && (
-              <Image src={form.avatarUrl} alt="Avatar" width={48} height={48} className="w-12 h-12 rounded-full object-cover border border-em/30" />
-            )}
-            <label className="flex items-center gap-2 font-mono text-xs text-em cursor-pointer bg-em/10 border border-em/30 rounded-lg px-3 py-2">
-              <Upload size={13} />
-              {uploading ? 'Uploading...' : 'Upload photo'}
-              <input type="file" accept="image/*" onChange={uploadAvatar} className="hidden" />
-            </label>
+          <div className="flex items-center gap-4">
+            {/* Live hexagon preview — same clip-path and aspect as the hero */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="relative w-24 aspect-[10/11]">
+                <div
+                  className="absolute inset-0 bg-bg3 border border-em/60 flex items-center justify-center overflow-hidden"
+                  style={{ clipPath: 'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)' }}
+                >
+                  {form.avatarUrl ? (
+                    <Image src={form.avatarUrl} alt="Avatar" fill className="object-cover" />
+                  ) : (
+                    <span className="font-display text-xl font-extrabold text-em">AH</span>
+                  )}
+                </div>
+              </div>
+              <span className="font-mono text-[10px] text-gray-500">hero preview</span>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 font-mono text-xs text-em cursor-pointer bg-em/10 border border-em/30 rounded-lg px-3 py-2">
+                <Upload size={13} />
+                {uploading ? 'Uploading...' : 'Upload photo'}
+                <input type="file" accept="image/*" onChange={onFileSelect} className="hidden" />
+              </label>
+              {form.avatarUrl && (
+                <button
+                  type="button"
+                  onClick={adjustExisting}
+                  disabled={cropLoading}
+                  className="flex items-center gap-2 font-mono text-xs text-gray-300 border border-em/30 rounded-lg px-3 py-2 disabled:opacity-60"
+                >
+                  <Crop size={13} />
+                  {cropLoading ? 'Loading...' : 'Adjust'}
+                </button>
+              )}
+            </div>
           </div>
+          {uploadError && <p className="font-mono text-xs text-red-400 mt-2">{uploadError}</p>}
         </div>
 
         <Field label="GitHub URL" field="githubUrl" form={form} set={set} />
