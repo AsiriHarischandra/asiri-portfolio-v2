@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Save, Upload, Plus, Trash2, Crop } from 'lucide-react';
 import AvatarCropModal from '@/components/admin/AvatarCropModal';
-import { readFileAsDataURL } from '@/lib/cropImage';
-import { uploadToCloudinary } from '@/lib/cloudinaryUpload';
+import { downscaleImage } from '@/lib/cropImage';
+import { uploadToCloudinary, buildCroppedUrl } from '@/lib/cloudinaryUpload';
 import {
   DEFAULT_SKILLS,
   DEFAULT_INTERESTS,
@@ -157,6 +157,11 @@ export default function SettingsPanel() {
   const [uploadError, setUploadError] = useState('');
   // True when cropSrc is an object URL that must be revoked on close.
   const cropSrcIsObjectUrl = useRef(false);
+  // Freshly picked (downscaled) blob awaiting upload; null while
+  // re-adjusting an already-uploaded photo.
+  const pendingBlobRef = useRef(null);
+  // Saved crop to restore the cropper position when re-adjusting.
+  const [initialCrop, setInitialCrop] = useState(null);
 
   useEffect(() => {
     fetch('/api/admin/settings').then(r => r.json()).then(data => {
@@ -180,6 +185,8 @@ export default function SettingsPanel() {
   const closeCrop = () => {
     if (cropSrcIsObjectUrl.current && cropSrc) URL.revokeObjectURL(cropSrc);
     cropSrcIsObjectUrl.current = false;
+    pendingBlobRef.current = null;
+    setInitialCrop(null);
     setCropSrc(null);
   };
 
@@ -197,26 +204,34 @@ export default function SettingsPanel() {
       return;
     }
     try {
-      const dataUrl = await readFileAsDataURL(file);
-      cropSrcIsObjectUrl.current = false;
-      setCropSrc(dataUrl);
+      // Downscale first: the cropper runs on this exact blob and the same
+      // blob is uploaded, so crop coordinates always match the stored image.
+      const blob = await downscaleImage(file);
+      pendingBlobRef.current = blob;
+      cropSrcIsObjectUrl.current = true;
+      setInitialCrop(null);
+      setCropSrc(URL.createObjectURL(blob));
     } catch {
       setUploadError('Could not read that file — try another one.');
     }
   };
 
-  // Re-open the cropper on the already-uploaded photo. Fetch → object URL
-  // (instead of crossOrigin on <img>) so the canvas can never be tainted
-  // by a cached non-CORS response.
+  // Re-open the cropper on the untransformed original, pre-positioned at
+  // the saved crop, so cut-off parts can always be recovered.
   const adjustExisting = async () => {
-    if (!form.avatarUrl) return;
+    const srcUrl = form.avatarOriginalUrl || form.avatarUrl;
+    if (!srcUrl) return;
     setUploadError('');
     setCropLoading(true);
     try {
-      const res = await fetch(form.avatarUrl);
+      const res = await fetch(srcUrl);
       if (!res.ok) throw new Error();
       const blob = await res.blob();
       cropSrcIsObjectUrl.current = true;
+      pendingBlobRef.current = null;
+      // Legacy docs have no original — the saved crop (if any) wouldn't be
+      // in that image's coordinate space, so start centered instead.
+      setInitialCrop(form.avatarOriginalUrl ? form.avatarCrop || null : null);
       setCropSrc(URL.createObjectURL(blob));
     } catch {
       setUploadError('Could not load current photo — upload a new one.');
@@ -225,13 +240,34 @@ export default function SettingsPanel() {
     }
   };
 
-  const handleCropConfirm = async (blob) => {
+  const handleCropConfirm = async (cropPixels) => {
+    const blob = pendingBlobRef.current;
     closeCrop();
-    setUploading(true);
     setUploadError('');
+
+    if (!blob) {
+      // Re-adjust: the original is already on Cloudinary — just rebuild the
+      // cropped delivery URL, no upload. (First re-adjust of a legacy doc
+      // promotes its old cropped upload to the original.)
+      const original = form.avatarOriginalUrl || form.avatarUrl;
+      setForm((f) => ({
+        ...f,
+        avatarOriginalUrl: original,
+        avatarCrop: cropPixels,
+        avatarUrl: buildCroppedUrl(original, cropPixels),
+      }));
+      return;
+    }
+
+    setUploading(true);
     try {
       const url = await uploadToCloudinary(blob, 'avatar.jpg');
-      setForm((f) => ({ ...f, avatarUrl: url }));
+      setForm((f) => ({
+        ...f,
+        avatarOriginalUrl: url,
+        avatarCrop: cropPixels,
+        avatarUrl: buildCroppedUrl(url, cropPixels),
+      }));
     } catch (err) {
       setUploadError(err.message || 'Upload failed — try again.');
     } finally {
@@ -257,6 +293,8 @@ export default function SettingsPanel() {
           linkedinUrl: form.linkedinUrl,
           email: form.email,
           avatarUrl: form.avatarUrl,
+          avatarOriginalUrl: form.avatarOriginalUrl,
+          avatarCrop: form.avatarCrop,
           avatarBadge: form.avatarBadge,
           availability: form.availability,
           skills: (form.skills || []).filter(s => s.name?.trim()),
@@ -288,7 +326,7 @@ export default function SettingsPanel() {
   return (
     <div>
       {cropSrc && (
-        <AvatarCropModal src={cropSrc} onCancel={closeCrop} onConfirm={handleCropConfirm} />
+        <AvatarCropModal src={cropSrc} initialCrop={initialCrop} onCancel={closeCrop} onConfirm={handleCropConfirm} />
       )}
 
       <h2 className="font-display text-xl font-bold mb-6">Settings</h2>

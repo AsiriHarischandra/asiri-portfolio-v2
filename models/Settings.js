@@ -10,6 +10,13 @@ const SettingsSchema = new mongoose.Schema({
   linkedinUrl:  { type: String, default: '' },
   email:        { type: String, default: '' },
   avatarUrl:    { type: String, default: '' },
+  // Untransformed upload + crop region, so the avatar can be re-framed
+  // later without losing the parts outside the current crop.
+  avatarOriginalUrl: { type: String, default: '' },
+  avatarCrop: new mongoose.Schema(
+    { x: Number, y: Number, width: Number, height: Number },
+    { _id: false }
+  ),
   avatarBadge:  { type: String, default: 'UoM · CS' },
   availability: { type: String, default: 'open to internships' },
 
