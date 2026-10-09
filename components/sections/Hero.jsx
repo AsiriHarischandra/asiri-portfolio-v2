@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { MapPin, Github, Linkedin, Mail } from 'lucide-react';
+import { MapPin, Github, Linkedin, Mail, Download, ArrowRight, GraduationCap } from 'lucide-react';
 
 const ROLES = ['Full-stack developer', 'AI/ML enthusiast', 'UoM undergraduate', 'Problem solver'];
 
@@ -88,9 +88,37 @@ export default function Hero({ settings, updates }) {
               <Typewriter />
             </div>
 
+            {s.cgpa && (
+              <p className="mt-3 font-mono text-xs text-gray-400 flex items-center gap-1.5">
+                <GraduationCap size={14} className="text-lime" />
+                {s.university || 'University of Moratuwa'}
+                <span className="text-gray-600">·</span>
+                <span className="text-lime">CGPA {s.cgpa}</span>
+              </p>
+            )}
+
             <p className="text-sm text-gray-400 leading-relaxed mt-4 max-w-sm">
               {s.bio || 'CS undergraduate at University of Moratuwa, building fast web apps and exploring AI.'}
             </p>
+
+            <div className="flex flex-wrap items-center gap-3 mt-6">
+              <a
+                href="#projects"
+                className="inline-flex items-center gap-1.5 font-mono text-xs bg-em text-bg px-4 py-2.5 rounded-lg font-medium hover:shadow-lg hover:shadow-em/30 transition"
+              >
+                View projects <ArrowRight size={14} />
+              </a>
+              {s.cvUrl && (
+                <a
+                  href={s.cvUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-mono text-xs text-lime border border-lime/40 px-4 py-2.5 rounded-lg hover:bg-lime/10 transition"
+                >
+                  <Download size={14} /> Download CV
+                </a>
+              )}
+            </div>
 
             <div className="flex items-center gap-4 mt-5">
               <span className="font-mono text-xs text-green-300 flex items-center gap-1">

@@ -19,12 +19,15 @@ const SettingsSchema = new mongoose.Schema({
   ),
   avatarBadge:  { type: String, default: 'UoM · CS' },
   availability: { type: String, default: 'open to internships' },
+  cgpa:         { type: String, default: '' },   // e.g. "3.58 / 4.00" — shown in hero
+  cvUrl:        { type: String, default: '' },   // PDF link for "Download CV"
 
   // Editable section content (fall back to lib/defaults.js when empty)
   skills:    [{ _id: false, name: String, level: Number }],
   interests: [String],
   techStack: [{ _id: false, name: String, category: String }],
-  education: [{ _id: false, period: String, title: String, subtitle: String }],
+  education: [{ _id: false, period: String, title: String, subtitle: String, detail: String }],
+  certificates: [{ _id: false, title: String, issuer: String, date: String, url: String }],
 }, { timestamps: true });
 
 export default mongoose.models.Settings || mongoose.model('Settings', SettingsSchema);

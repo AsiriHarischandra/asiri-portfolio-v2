@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { label: 'contact',   href: '#contact' },
 ];
 
-export default function Navbar() {
+export default function Navbar({ cvUrl = '' }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -28,6 +28,11 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
+          {cvUrl && (
+            <a href={cvUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-lime hover:text-em transition">
+              resume
+            </a>
+          )}
           <a
             href="#contact"
             className="font-mono text-xs bg-em text-bg px-4 py-2 rounded-lg font-medium hover:shadow-lg hover:shadow-em/30 transition"
@@ -59,6 +64,12 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
+          {cvUrl && (
+            <a href={cvUrl} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}
+              className="font-mono text-sm text-lime hover:text-em transition">
+              resume
+            </a>
+          )}
         </div>
       )}
     </nav>

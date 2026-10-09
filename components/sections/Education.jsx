@@ -31,6 +31,11 @@ export default function Education({ settings }) {
                 {item.subtitle && (
                   <div className="text-xs text-gray-500 mt-1">{item.subtitle}</div>
                 )}
+                {item.detail && (
+                  <span className="inline-block mt-2 font-mono text-[10px] text-lime bg-lime/10 border border-lime/30 rounded-full px-2.5 py-0.5">
+                    {item.detail}
+                  </span>
+                )}
               </div>
             ))}
           </div>

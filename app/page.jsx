@@ -2,6 +2,7 @@ import Navbar     from '@/components/layout/Navbar';
 import Hero       from '@/components/sections/Hero';
 import About      from '@/components/sections/About';
 import Education  from '@/components/sections/Education';
+import Certifications from '@/components/sections/Certifications';
 import Projects   from '@/components/sections/Projects';
 import Updates    from '@/components/sections/Updates';
 import TechStack  from '@/components/sections/TechStack';
@@ -23,10 +24,11 @@ export default async function Home() {
 
   return (
     <main>
-      <Navbar />
+      <Navbar cvUrl={settings?.cvUrl || ''} />
       <Hero settings={serialize(settings)} updates={serializeMany(updates)} />
       <About settings={serialize(settings)} projectsCount={projects.length} />
       <Education settings={serialize(settings)} />
+      <Certifications settings={serialize(settings)} />
       <Projects projects={serializeMany(projects)} />
       <Updates updates={serializeMany(updates)} />
       <TechStack settings={serialize(settings)} />
