@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Save, Upload, Plus, Trash2, Crop } from 'lucide-react';
+import { Save, Upload, Plus, Trash2, Crop, FileText } from 'lucide-react';
 import AvatarCropModal from '@/components/admin/AvatarCropModal';
 import { downscaleImage } from '@/lib/cropImage';
 import { uploadToCloudinary, buildCroppedUrl } from '@/lib/cloudinaryUpload';
@@ -136,12 +136,45 @@ function EducationEditor({ items, onChange }) {
                 className={`${inputCls} w-full`} />
               <input value={r.subtitle || ''} placeholder="Subtitle (e.g. University of Moratuwa)" onChange={e => update(i, 'subtitle', e.target.value)}
                 className={`${inputCls} w-full`} />
+              <input value={r.detail || ''} placeholder="Highlight chip (optional, e.g. CGPA 3.58 / 4.00 or 9 A's)" onChange={e => update(i, 'detail', e.target.value)}
+                className={`${inputCls} w-full`} />
             </div>
             <RemoveButton onClick={() => onChange(rows.filter((_, j) => j !== i))} />
           </div>
         ))}
       </div>
-      <AddButton onClick={() => onChange([...rows, { period: '', title: '', subtitle: '' }])}>Add education entry</AddButton>
+      <AddButton onClick={() => onChange([...rows, { period: '', title: '', subtitle: '', detail: '' }])}>Add education entry</AddButton>
+    </div>
+  );
+}
+
+// ── Certificates: title + issuer + date + credential URL ──
+function CertificatesEditor({ items, onChange }) {
+  const rows = items || [];
+  const update = (i, key, val) => onChange(rows.map((r, j) => (j === i ? { ...r, [key]: val } : r)));
+  return (
+    <div>
+      <label className="font-mono text-[10px] text-gray-500 uppercase tracking-wider mb-1 block">Certificates</label>
+      <div className="space-y-3">
+        {rows.map((r, i) => (
+          <div key={i} className="flex items-start gap-2 bg-white/[0.03] border border-em/15 rounded-lg p-2">
+            <div className="flex-1 space-y-2">
+              <input value={r.title || ''} placeholder="Title (e.g. Web Development)" onChange={e => update(i, 'title', e.target.value)}
+                className={`${inputCls} w-full`} />
+              <div className="flex gap-2">
+                <input value={r.issuer || ''} placeholder="Issuer (e.g. CODL, UoM)" onChange={e => update(i, 'issuer', e.target.value)}
+                  className={`${inputCls} flex-1 min-w-0`} />
+                <input value={r.date || ''} placeholder="Date (e.g. 2024)" onChange={e => update(i, 'date', e.target.value)}
+                  className={`${inputCls} w-28`} />
+              </div>
+              <input value={r.url || ''} placeholder="Credential URL (optional, https://...)" onChange={e => update(i, 'url', e.target.value)}
+                className={`${inputCls} w-full`} />
+            </div>
+            <RemoveButton onClick={() => onChange(rows.filter((_, j) => j !== i))} />
+          </div>
+        ))}
+      </div>
+      <AddButton onClick={() => onChange([...rows, { title: '', issuer: '', date: '', url: '' }])}>Add certificate</AddButton>
     </div>
   );
 }
@@ -155,6 +188,8 @@ export default function SettingsPanel() {
   const [cropSrc, setCropSrc]     = useState(null);
   const [cropLoading, setCropLoading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [cvUploading, setCvUploading] = useState(false);
+  const [cvError, setCvError]         = useState('');
   // True when cropSrc is an object URL that must be revoked on close.
   const cropSrcIsObjectUrl = useRef(false);
   // Freshly picked (downscaled) blob awaiting upload; null while
@@ -173,6 +208,7 @@ export default function SettingsPanel() {
         interests: data.interests?.length ? data.interests : DEFAULT_INTERESTS,
         techStack: data.techStack?.length ? data.techStack : DEFAULT_TECHSTACK,
         education: data.education?.length ? data.education : DEFAULT_EDUCATION,
+        certificates: data.certificates || [],
       });
     });
   }, []);
@@ -275,6 +311,24 @@ export default function SettingsPanel() {
     }
   };
 
+  const onCvSelect = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setCvError('');
+    if (file.type !== 'application/pdf') { setCvError('Please choose a PDF file.'); return; }
+    if (file.size > 10 * 1024 * 1024)    { setCvError('PDF is too large (max 10MB).'); return; }
+    setCvUploading(true);
+    try {
+      const url = await uploadToCloudinary(file, 'cv.pdf', 'raw');
+      setForm((f) => ({ ...f, cvUrl: url }));
+    } catch (err) {
+      setCvError(err.message || 'Upload failed — try again.');
+    } finally {
+      setCvUploading(false);
+    }
+  };
+
   const save = async () => {
     setSaving(true);
     setSaved(false);
@@ -297,6 +351,11 @@ export default function SettingsPanel() {
           avatarCrop: form.avatarCrop,
           avatarBadge: form.avatarBadge,
           availability: form.availability,
+          cgpa: form.cgpa,
+          cvUrl: form.cvUrl,
+          certificates: (form.certificates || [])
+            .filter(c => c.title?.trim())
+            .map(c => ({ ...c, url: c.url?.trim() || '' })),
           skills: (form.skills || []).filter(s => s.name?.trim()),
           interests: (form.interests || []).map(i => i.trim()).filter(Boolean),
           techStack: (form.techStack || []).filter(t => t.name?.trim()),
@@ -338,6 +397,7 @@ export default function SettingsPanel() {
         <Field label="Location" field="location" form={form} set={set} />
         <Field label="Availability status" field="availability" form={form} set={set} />
         <Field label="Avatar badge (e.g. UoM · CS)" field="avatarBadge" form={form} set={set} />
+        <Field label="CGPA shown in hero (e.g. 3.58 / 4.00 — leave empty to hide)" field="cgpa" form={form} set={set} />
         <Field label="Bio" field="bio" rows={4} form={form} set={set} />
 
         {/* Avatar upload */}
@@ -382,17 +442,38 @@ export default function SettingsPanel() {
           {uploadError && <p className="font-mono text-xs text-red-400 mt-2">{uploadError}</p>}
         </div>
 
+        {/* CV / resume */}
+        <div>
+          <label className="font-mono text-[10px] text-gray-500 uppercase tracking-wider mb-1 block">CV / Resume (PDF)</label>
+          <div className="flex items-center gap-2">
+            <input value={form.cvUrl || ''} onChange={set('cvUrl')} placeholder="Upload a PDF or paste a link"
+              className={`${inputCls} flex-1 min-w-0`} />
+            <label className="flex items-center gap-2 font-mono text-xs text-em cursor-pointer bg-em/10 border border-em/30 rounded-lg px-3 py-2 shrink-0">
+              <FileText size={13} />
+              {cvUploading ? 'Uploading...' : 'Upload PDF'}
+              <input type="file" accept="application/pdf" onChange={onCvSelect} className="hidden" />
+            </label>
+          </div>
+          {form.cvUrl && (
+            <a href={form.cvUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-[10px] text-em/80 underline mt-1 inline-block">
+              open current CV
+            </a>
+          )}
+          {cvError && <p className="font-mono text-xs text-red-400 mt-2">{cvError}</p>}
+        </div>
+
         <Field label="GitHub URL" field="githubUrl" form={form} set={set} />
         <Field label="LinkedIn URL" field="linkedinUrl" form={form} set={set} />
         <Field label="Email" field="email" type="email" form={form} set={set} />
 
         {/* Editable section content */}
         <div className="border-t border-em/15 pt-4 space-y-5">
-          <p className="font-mono text-[10px] text-em/70 uppercase tracking-wider">About · Tech stack · Education</p>
+          <p className="font-mono text-[10px] text-em/70 uppercase tracking-wider">About · Tech stack · Education · Certificates</p>
           <SkillsEditor    items={form.skills}    onChange={setArr('skills')} />
           <InterestsEditor items={form.interests} onChange={setArr('interests')} />
           <TechEditor      items={form.techStack} onChange={setArr('techStack')} />
           <EducationEditor items={form.education} onChange={setArr('education')} />
+          <CertificatesEditor items={form.certificates} onChange={setArr('certificates')} />
         </div>
 
         <div className="flex items-center gap-3 pt-2">
