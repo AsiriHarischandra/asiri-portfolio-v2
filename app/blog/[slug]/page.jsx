@@ -3,14 +3,9 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
-import { getBlogPost, getAllBlogSlugs, readingTime, serialize } from '@/lib/data';
+import { getBlogPost, readingTime, serialize } from '@/lib/data';
 
-export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const slugs = await getAllBlogSlugs();
-  return slugs.map(slug => ({ slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;

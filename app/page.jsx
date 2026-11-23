@@ -12,7 +12,7 @@ import Footer     from '@/components/layout/Footer';
 
 import { getProjects, getUpdates, getBlogPosts, getSettings, serializeMany, serialize } from '@/lib/data';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const [projects, updates, posts, settings] = await Promise.all([
