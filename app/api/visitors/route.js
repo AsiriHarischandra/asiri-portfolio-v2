@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { dbConnect }   from '@/lib/db';
 import Visitor         from '@/models/Visitor';
 
+export const dynamic = 'force-dynamic';
+
 // GET — read current count without incrementing (used by admin dashboard)
 export async function GET() {
   await dbConnect();

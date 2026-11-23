@@ -4,6 +4,8 @@ import { dbConnect } from '@/lib/db';
 import Project from '@/models/Project';
 import { validate, projectSchema } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function PUT(request, { params }) {
   try {
     await dbConnect();

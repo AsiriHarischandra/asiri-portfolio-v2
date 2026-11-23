@@ -4,6 +4,8 @@ import { dbConnect } from '@/lib/db';
 import Update from '@/models/Update';
 import { validate, updateSchema } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   await dbConnect();
   const updates = await Update.find().sort({ createdAt: -1 });

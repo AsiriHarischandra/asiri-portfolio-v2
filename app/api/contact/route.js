@@ -5,6 +5,8 @@ import { validate, contactSchema } from '@/lib/validation';
 import { rateLimit } from '@/lib/rateLimit';
 import { sendContactEmail } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request) {
   try {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
