@@ -15,12 +15,12 @@ import { getProjects, getUpdates, getBlogPosts, getSettings, serializeMany, seri
 export const revalidate = 60;
 
 export default async function Home() {
-  const [projects, updates, posts, settings] = await Promise.all([
-    getProjects(),
-    getUpdates(),
-    getBlogPosts(),
-    getSettings(),
-  ]);
+  // Without a DB (e.g. CI builds with no secrets) render with empty data /
+  // section defaults instead of failing the build. In production the URI is
+  // set, so real DB errors still surface.
+  const [projects, updates, posts, settings] = process.env.MONGODB_URI
+    ? await Promise.all([getProjects(), getUpdates(), getBlogPosts(), getSettings()])
+    : [[], [], [], null];
 
   return (
     <main>
