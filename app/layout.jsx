@@ -1,6 +1,5 @@
 import { Outfit, DM_Sans, DM_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
-import ParticleCanvas from '@/components/ui/ParticleCanvas';
 import './globals.css';
 
 const outfit = Outfit({
@@ -48,7 +47,6 @@ export default function RootLayout({ children }) {
       <body
         className={`${outfit.variable} ${dmSans.variable} ${dmMono.variable} bg-bg text-white antialiased`}
       >
-        <ParticleCanvas />
         {children}
         <Analytics />
       </body>
