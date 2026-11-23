@@ -1,9 +1,8 @@
-import { Syne, DM_Sans, DM_Mono } from 'next/font/google';
+import { Outfit, DM_Sans, DM_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
-import ParticleCanvas from '@/components/ui/ParticleCanvas';
 import './globals.css';
 
-const syne = Syne({
+const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-display',
   display: 'swap',
@@ -46,9 +45,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth">
       <body
-        className={`${syne.variable} ${dmSans.variable} ${dmMono.variable} bg-bg text-white antialiased`}
+        className={`${outfit.variable} ${dmSans.variable} ${dmMono.variable} bg-bg text-white antialiased`}
       >
-        <ParticleCanvas />
         {children}
         <Analytics />
       </body>

@@ -3,38 +3,28 @@ import ProjectCard from '@/components/ui/ProjectCard';
 export default function Projects({ projects }) {
   if (!projects || projects.length === 0) return null;
 
-  const featured = projects.find(p => p.featured);
-  const others   = projects.filter(p => !p.featured);
-
   return (
-    <section id="projects" className="py-28 bg-bg/80">
-      <div className="max-w-5xl mx-auto px-6 md:px-8">
-        <span className="font-mono text-xs text-em/80">{'// projects'}</span>
-        <h2 className="font-display text-3xl md:text-4xl font-bold mt-2 mb-10">
-          Selected work
-        </h2>
+    <section id="projects" className="py-32">
+      <div className="max-w-6xl mx-auto px-6 md:px-10">
 
-        {featured ? (
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-            <div className="md:col-span-3">
-              <ProjectCard project={featured} featured />
-            </div>
-            <div className="md:col-span-2 flex flex-col gap-4">
-              {others.slice(0, 2).map(p => (
-                <ProjectCard key={p._id} project={p} />
-              ))}
-            </div>
+        {/* Section header */}
+        <div className="flex items-end gap-6 mb-16">
+          <div>
+            <span className="font-mono text-[10px] tracking-widest uppercase text-em/60 block mb-2">02 / Work</span>
+            <h2 className="font-display font-black text-4xl md:text-5xl lg:text-6xl text-white leading-none tracking-tight">
+              Selected<span className="text-em">.</span>
+            </h2>
           </div>
-        ) : null}
+          <div className="hidden md:block flex-1 h-px bg-white/[0.06] mb-3" />
+        </div>
 
-        {/* Remaining projects */}
-        {(featured ? others.slice(2) : others).length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-            {(featured ? others.slice(2) : others).map(p => (
-              <ProjectCard key={p._id} project={p} />
-            ))}
-          </div>
-        )}
+        {/* Uniform grid — every card same size */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.map(p => (
+            <ProjectCard key={p._id} project={p} featured={p.featured} />
+          ))}
+        </div>
+
       </div>
     </section>
   );

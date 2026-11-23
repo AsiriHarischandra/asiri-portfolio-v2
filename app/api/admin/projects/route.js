@@ -4,6 +4,8 @@ import { dbConnect } from '@/lib/db';
 import Project from '@/models/Project';
 import { validate, projectSchema } from '@/lib/validation';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   await dbConnect();
   const projects = await Project.find().sort({ createdAt: -1 });

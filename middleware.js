@@ -35,5 +35,6 @@ export const config = {
   matcher: [
     '/admin/dashboard/:path*',
     '/api/admin/:path*',
+    '/api/upload-signature', 
   ],
 };

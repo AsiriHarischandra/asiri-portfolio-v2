@@ -11,28 +11,56 @@
     font-family: var(--font-body), sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background: #020B07;
   }
 
   ::selection {
-    background: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.25);
     color: #f2fbf7;
   }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #020b07;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #10b981;
-    border-radius: 3px;
-  }
+  /* Thin emerald scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #020B07; }
+  ::-webkit-scrollbar-thumb { background: #10b981; }
 }
 
 @layer utilities {
+  /* Gradient text — emerald→cyan */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-em to-lime;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(90deg, #10B981 0%, #22D3EE 100%);
+  }
+
+  /* Section label — small caps above a heading */
+  .section-label {
+    @apply font-mono text-xs tracking-widest uppercase text-em/70;
+  }
+
+  /* Sharp card surface */
+  .card {
+    @apply bg-white/[0.03] border border-white/[0.07] transition-colors duration-200;
+  }
+  .card:hover {
+    @apply border-em/30;
+  }
+
+  /* Frameless photo fade effect */
+  .photo-fade {
+    mask-image:
+      linear-gradient(to bottom, black 40%, transparent 100%),
+      linear-gradient(to right,  black 60%, transparent 100%),
+      linear-gradient(to left,   black 60%, transparent 100%);
+    mask-composite: intersect;
+    -webkit-mask-image:
+      linear-gradient(to bottom, black 40%, transparent 100%),
+      linear-gradient(to right,  black 60%, transparent 100%),
+      linear-gradient(to left,   black 60%, transparent 100%);
+    -webkit-mask-composite: destination-in;
+  }
+
+  /* Thin horizontal rule with accent */
+  .accent-rule {
+    @apply h-px w-12 bg-em;
   }
 }

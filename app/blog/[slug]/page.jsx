@@ -7,9 +7,18 @@ import { getBlogPost, getAllBlogSlugs, readingTime, serialize } from '@/lib/data
 
 export const revalidate = 60;
 
+// Pre-render known posts at build time when the DB is reachable. If it isn't
+// (e.g. CI without secrets), return [] — posts are then rendered on first
+// request and cached via ISR (dynamicParams defaults to true).
 export async function generateStaticParams() {
-  const slugs = await getAllBlogSlugs();
-  return slugs.map(slug => ({ slug }));
+  if (!process.env.MONGODB_URI) return [];
+  try {
+    const slugs = await getAllBlogSlugs();
+    return slugs.map(slug => ({ slug }));
+  } catch (err) {
+    console.warn('[blog] generateStaticParams skipped:', err.message);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }) {

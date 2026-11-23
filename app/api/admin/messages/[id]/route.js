@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import Message from '@/models/Message';
 
+export const dynamic = 'force-dynamic';
+
 export async function PUT(request, { params }) {
   await dbConnect();
   const { id } = await params;

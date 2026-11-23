@@ -4,6 +4,8 @@ import { signToken, setTokenCookie } from '@/lib/auth';
 import { validate, loginSchema } from '@/lib/validation';
 import { rateLimit } from '@/lib/rateLimit';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request) {
   try {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';

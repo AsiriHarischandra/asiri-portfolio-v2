@@ -9,19 +9,27 @@ export default function About({ settings, projectsCount }) {
   const projCount = typeof projectsCount === 'number' ? projectsCount : 0;
 
   return (
-    <section id="about" className="py-28 bg-bg/80">
-      <div className="max-w-5xl mx-auto px-6 md:px-8">
-        <span className="font-mono text-xs text-em/80">{'// about'}</span>
-        <h2 className="font-display text-3xl md:text-4xl font-bold mt-2 mb-10">
-          Who I am
-        </h2>
+    <section id="about" className="py-32">
+      <div className="max-w-6xl mx-auto px-6 md:px-10">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {/* Bio + skills */}
+        {/* Section header */}
+        <div className="flex items-end gap-6 mb-16">
           <div>
-            <p className="text-sm text-gray-400 leading-relaxed mb-8">
+            <span className="font-mono text-[10px] tracking-widest uppercase text-em/60 block mb-2">01 / About</span>
+            <h2 className="font-display font-black text-4xl md:text-5xl lg:text-6xl text-white leading-none tracking-tight">
+              Who I Am<span className="text-em">.</span>
+            </h2>
+          </div>
+          <div className="hidden md:block flex-1 h-px bg-white/[0.06] mb-3" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+
+          {/* Left — bio + skills */}
+          <div>
+            <p className="text-sm text-white/40 leading-relaxed mb-10 max-w-sm">
               {s.bio ||
-                'CS undergraduate at University of Moratuwa, building clean and fast web applications. Passionate about full-stack development and exploring the intersection of AI and practical engineering.'}
+                'CS undergraduate at University of Moratuwa building clean, fast web applications. Passionate about full-stack engineering and the intersection of AI with practical software.'}
             </p>
 
             <div className="space-y-5">
@@ -31,33 +39,38 @@ export default function About({ settings, projectsCount }) {
             </div>
           </div>
 
-          {/* Interest chips + value cards */}
+          {/* Right — interests + stats */}
           <div>
-            <h3 className="font-mono text-xs text-em/80 mb-3">interests</h3>
-            <div className="flex flex-wrap gap-2 mb-8">
+
+            {/* Stats row */}
+            <div className="grid grid-cols-2 gap-4 mb-10">
+              <div className="card p-6">
+                <div className="font-display text-5xl font-black text-em leading-none mb-2">{projCount}</div>
+                <div className="font-mono text-[10px] tracking-widest uppercase text-white/30">
+                  Projects Built
+                </div>
+              </div>
+              <div className="card p-6">
+                <div className="font-display text-5xl font-black text-cyan leading-none mb-2">{techCount}</div>
+                <div className="font-mono text-[10px] tracking-widest uppercase text-white/30">
+                  Technologies
+                </div>
+              </div>
+            </div>
+
+            {/* Interests */}
+            <span className="font-mono text-[10px] tracking-widest uppercase text-white/30 block mb-4">
+              Interests
+            </span>
+            <div className="flex flex-wrap gap-2">
               {interests.map(i => (
                 <span
                   key={i}
-                  className="font-mono text-xs text-green-200 bg-em/10 border border-em/25 rounded-full px-3 py-1.5"
+                  className="font-mono text-[10px] tracking-wide uppercase text-em border border-em/20 px-3 py-1.5 hover:border-em/50 hover:text-white transition-colors"
                 >
                   {i}
                 </span>
               ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white/[0.04] border border-em/20 rounded-xl p-4">
-                <div className="font-display text-2xl font-extrabold text-em">{projCount}</div>
-                <div className="font-mono text-[10px] text-gray-400 tracking-wider uppercase mt-1">
-                  Projects
-                </div>
-              </div>
-              <div className="bg-white/[0.04] border border-em/20 rounded-xl p-4">
-                <div className="font-display text-2xl font-extrabold text-em">{techCount}</div>
-                <div className="font-mono text-[10px] text-gray-400 tracking-wider uppercase mt-1">
-                  Technologies
-                </div>
-              </div>
             </div>
           </div>
         </div>

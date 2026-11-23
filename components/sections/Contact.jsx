@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail } from 'lucide-react';
+import { Mail, ArrowRight } from 'lucide-react';
 
 export default function Contact() {
   const [form, setForm]     = useState({ name: '', email: '', subject: '', message: '', honeypot: '' });
@@ -16,10 +16,7 @@ export default function Contact() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (res.status === 429) {
-        setStatus('rate-limited');
-        return;
-      }
+      if (res.status === 429) { setStatus('rate-limited'); return; }
       if (!res.ok) throw new Error();
       setStatus('sent');
       setForm({ name: '', email: '', subject: '', message: '', honeypot: '' });
@@ -30,85 +27,107 @@ export default function Contact() {
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
+  const inputClass =
+    'bg-white/[0.03] border border-white/[0.08] px-4 py-3.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-em transition-colors font-body w-full';
+
   return (
-    <section id="contact" className="py-28 bg-bg/80">
-      <div className="max-w-5xl mx-auto px-6 md:px-8">
-        <div className="bg-white/[0.04] border border-lime/25 rounded-2xl p-8 md:p-12 text-center max-w-2xl mx-auto">
-          <span className="font-mono text-xs text-lime/80">{'// contact'}</span>
-          <h2 className="font-display text-3xl md:text-4xl font-bold mt-2 mb-2">
-            Let&apos;s build something
-          </h2>
-          <p className="text-sm text-gray-400 mb-8">
-            Have a project or an internship in mind? My inbox is open.
-          </p>
+    <section id="contact" className="py-32">
+      <div className="max-w-6xl mx-auto px-6 md:px-10">
 
-          {status === 'sent' ? (
-            <div className="text-em font-mono text-sm py-8">
-              Message sent. I&apos;ll get back to you soon.
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3 text-left">
-              {/* Honeypot — hidden from humans */}
-              <input
-                type="text"
-                name="honeypot"
-                value={form.honeypot}
-                onChange={set('honeypot')}
-                tabIndex={-1}
-                autoComplete="off"
-                className="absolute opacity-0 h-0 w-0 pointer-events-none"
-                aria-hidden="true"
-              />
+        {/* Section header */}
+        <div className="flex items-end gap-6 mb-16">
+          <div>
+            <span className="font-mono text-[10px] tracking-widest uppercase text-em/60 block mb-2">04 / Contact</span>
+            <h2 className="font-display font-black text-4xl md:text-5xl lg:text-6xl text-white leading-none tracking-tight">
+              Let&apos;s Talk<span className="text-em">.</span>
+            </h2>
+          </div>
+          <div className="hidden md:block flex-1 h-px bg-white/[0.06] mb-3" />
+        </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  required
-                  placeholder="Your name"
-                  value={form.name}
-                  onChange={set('name')}
-                  className="bg-white/5 border border-em/20 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-em transition"
-                />
-                <input
-                  required
-                  type="email"
-                  placeholder="Your email"
-                  value={form.email}
-                  onChange={set('email')}
-                  className="bg-white/5 border border-em/20 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-em transition"
-                />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+
+          {/* Left — copy */}
+          <div>
+            <p className="text-sm text-white/40 leading-relaxed mb-8 max-w-sm">
+              Have a project, an internship opportunity, or just want to say hi?
+              My inbox is always open — I read and reply to every message.
+            </p>
+            <div className="accent-rule mb-6" />
+            <div className="space-y-4 font-mono text-xs text-white/30 tracking-widest uppercase">
+              <div className="flex items-center gap-3">
+                <span className="text-em">▸</span>
+                <span>Response within 24h</span>
               </div>
-              <input
-                placeholder="Subject (optional)"
-                value={form.subject}
-                onChange={set('subject')}
-                className="bg-white/5 border border-em/20 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-em transition"
-              />
-              <textarea
-                required
-                rows={4}
-                placeholder="Your message"
-                value={form.message}
-                onChange={set('message')}
-                className="bg-white/5 border border-em/20 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-em transition resize-none"
-              />
+              <div className="flex items-center gap-3">
+                <span className="text-em">▸</span>
+                <span>Open to internships 2025</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-em">▸</span>
+                <span>Remote & on-site</span>
+              </div>
+            </div>
+          </div>
 
-              <button
-                type="submit"
-                disabled={status === 'sending'}
-                className="bg-em text-bg font-mono text-sm font-medium py-3 rounded-lg hover:shadow-lg hover:shadow-em/30 transition disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                <Mail size={14} />
-                {status === 'sending' ? 'Sending...' : 'Send message'}
-              </button>
+          {/* Right — form */}
+          <div>
+            {status === 'sent' ? (
+              <div className="card p-10 text-center">
+                <span className="font-display text-5xl font-black text-em block mb-3">✓</span>
+                <p className="font-display font-semibold text-white mb-1">Message sent.</p>
+                <p className="font-mono text-xs text-white/30 tracking-widest uppercase">I&apos;ll get back to you soon.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                {/* Honeypot */}
+                <input
+                  type="text"
+                  name="honeypot"
+                  value={form.honeypot}
+                  onChange={set('honeypot')}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  className="absolute opacity-0 h-0 w-0 pointer-events-none"
+                  aria-hidden="true"
+                />
 
-              {status === 'error' && (
-                <p className="text-red-400 text-xs text-center">Something went wrong. Try again.</p>
-              )}
-              {status === 'rate-limited' && (
-                <p className="text-amber-400 text-xs text-center">Too many messages. Try again later.</p>
-              )}
-            </form>
-          )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input required placeholder="Name" value={form.name} onChange={set('name')} className={inputClass} />
+                  <input required type="email" placeholder="Email" value={form.email} onChange={set('email')} className={inputClass} />
+                </div>
+                <input placeholder="Subject (optional)" value={form.subject} onChange={set('subject')} className={inputClass} />
+                <textarea
+                  required rows={5}
+                  placeholder="Your message"
+                  value={form.message}
+                  onChange={set('message')}
+                  className={`${inputClass} resize-none`}
+                />
+
+                <button
+                  type="submit"
+                  disabled={status === 'sending'}
+                  className="font-display text-xs font-semibold tracking-widest uppercase bg-em text-bg px-6 py-4 hover:bg-cyan transition-colors disabled:opacity-50 flex items-center justify-center gap-2 mt-1"
+                >
+                  <Mail size={12} />
+                  {status === 'sending' ? 'Sending…' : 'Send Message'}
+                  {status !== 'sending' && <ArrowRight size={12} />}
+                </button>
+
+                {status === 'error' && (
+                  <p className="text-red-400 font-mono text-[10px] tracking-widest uppercase text-center">
+                    Something went wrong — try again.
+                  </p>
+                )}
+                {status === 'rate-limited' && (
+                  <p className="text-amber-400 font-mono text-[10px] tracking-widest uppercase text-center">
+                    Too many messages — try later.
+                  </p>
+                )}
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </section>

@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { MapPin, Github, Linkedin, Mail, Download, ArrowRight, GraduationCap } from 'lucide-react';
 
-const ROLES = ['Full-stack developer', 'AI/ML enthusiast', 'UoM undergraduate', 'Problem solver'];
+const ROLES = ['Full-Stack Developer', 'AI/ML Enthusiast', 'UoM Undergraduate', 'Problem Solver'];
 
 const TYPE_COLORS = {
   progress:    'text-em',
-  learning:    'text-lime',
+  learning:    'text-cyan',
   upcoming:    'text-blue-400',
   achievement: 'text-amber-300',
 };
@@ -28,33 +28,24 @@ function Typewriter() {
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
-
     const timer = setInterval(() => {
       setCharIdx(prev => {
         if (deleting) {
-          if (prev <= 0) {
-            setDeleting(false);
-            setRoleIdx(r => (r + 1) % ROLES.length);
-            return 0;
-          }
+          if (prev <= 0) { setDeleting(false); setRoleIdx(r => (r + 1) % ROLES.length); return 0; }
           return prev - 1;
         } else {
-          if (prev >= ROLES[roleIdx].length) {
-            setTimeout(() => setDeleting(true), 1500);
-            return prev;
-          }
+          if (prev >= ROLES[roleIdx].length) { setTimeout(() => setDeleting(true), 1600); return prev; }
           return prev + 1;
         }
       });
-    }, 100);
-
+    }, 90);
     return () => clearInterval(timer);
   }, [roleIdx, deleting]);
 
   return (
-    <span className="font-mono text-sm md:text-base text-em">
+    <span className="font-mono text-xs md:text-sm text-em tracking-widest uppercase">
       {ROLES[roleIdx].slice(0, charIdx)}
-      <span className="text-lime animate-blink">▌</span>
+      <span className="text-cyan animate-blink">▌</span>
     </span>
   );
 }
@@ -63,151 +54,186 @@ export default function Hero({ settings, updates }) {
   const s = settings || {};
 
   return (
-    <section id="hero" className="min-h-screen flex flex-col justify-center pt-14">
-      <div className="max-w-5xl mx-auto px-6 md:px-8 w-full">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-10 py-12 md:py-0">
-          {/* Left — text */}
-          <div className="flex-1 min-w-0">
-            {/* Availability pill */}
-            <span className="inline-flex items-center gap-2 font-mono text-xs text-green-400 border border-green-400/30 rounded-full px-3 py-1.5 mb-5">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse-dot" />
-              {s.availability || 'open to internships'}
-            </span>
+    <section id="hero" className="min-h-screen flex flex-col justify-center pt-16">
+      <div className="max-w-6xl mx-auto px-6 md:px-10 w-full">
 
-            <h1 className="font-display text-4xl md:text-5xl font-extrabold text-white leading-tight">
-              {(s.name || 'Asiri Harischandra').split(' ').map((word, i) => (
-                <span key={i}>
-                  {word}
-                  {i === 0 ? <br /> : null}
-                </span>
-              ))}
-              <span className="text-lime">.</span>
+        {/* ── Main two-column ── */}
+        <div className="flex flex-col-reverse md:flex-row items-center gap-12 md:gap-20 py-16 md:py-0 md:min-h-[85vh]">
+
+          {/* LEFT — text */}
+          <div className="flex-1 min-w-0">
+
+            {/* Availability badge */}
+            <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-widest uppercase text-em border border-em/25 px-3 py-1.5 mb-8">
+              <span className="w-1.5 h-1.5 rounded-full bg-em animate-pulse-dot" />
+              {s.availability || 'Open to internships'}
+            </div>
+
+            {/* Name — full editorial scale */}
+            <h1 className="font-display font-black leading-[0.88] tracking-tight text-white mb-6"
+                style={{ fontSize: 'clamp(3.5rem, 9vw, 7.5rem)' }}>
+              {s.name
+                ? s.name.split(' ').map((word, i, arr) => (
+                    <span key={i} className="block">
+                      {i === arr.length - 1
+                        ? <>{word}<span className="text-em">.</span></>
+                        : word}
+                    </span>
+                  ))
+                : (
+                  <>
+                    <span className="block">Asiri</span>
+                    <span className="block">Haris<span className="text-gradient">chan</span>dra<span className="text-em">.</span></span>
+                  </>
+                )
+              }
             </h1>
 
-            <div className="mt-3 h-6">
+            {/* Typewriter role */}
+            <div className="h-5 mb-5">
               <Typewriter />
             </div>
 
-            {s.cgpa && (
-              <p className="mt-3 font-mono text-xs text-gray-400 flex items-center gap-1.5">
-                <GraduationCap size={14} className="text-lime" />
-                {s.university || 'University of Moratuwa'}
-                <span className="text-gray-600">·</span>
-                <span className="text-lime">CGPA {s.cgpa}</span>
-              </p>
-            )}
-
-            <p className="text-sm text-gray-400 leading-relaxed mt-4 max-w-sm">
-              {s.bio || 'CS undergraduate at University of Moratuwa, building fast web apps and exploring AI.'}
+            {/* University */}
+            <p className="font-mono text-xs text-white/30 flex items-center gap-2 mb-5 tracking-wide">
+              <GraduationCap size={12} className="text-em flex-shrink-0" />
+              <span>{s.university || 'University of Moratuwa'}</span>
+              {s.cgpa && (
+                <><span className="text-white/15">·</span><span className="text-cyan">{s.cgpa} GPA</span></>
+              )}
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 mt-6">
+            {/* Bio */}
+            <p className="text-sm text-white/40 leading-relaxed max-w-sm mb-8">
+              {s.bio || 'CS undergraduate building clean, fast web apps and exploring AI/ML. Based in Sri Lanka.'}
+            </p>
+
+            {/* Thin rule */}
+            <div className="accent-rule mb-8" />
+
+            {/* CTAs — sharp, no radius */}
+            <div className="flex flex-wrap items-center gap-3 mb-8">
               <a
                 href="#projects"
-                className="inline-flex items-center gap-1.5 font-mono text-xs bg-em text-bg px-4 py-2.5 rounded-lg font-medium hover:shadow-lg hover:shadow-em/30 transition"
+                className="inline-flex items-center gap-2 font-display text-xs font-semibold tracking-widest uppercase bg-em text-bg px-6 py-3.5 hover:bg-cyan transition-colors duration-200"
               >
-                View projects <ArrowRight size={14} />
+                View Work <ArrowRight size={12} />
               </a>
-              {s.cvUrl && (
+              {s.cvUrl ? (
                 <a
                   href={s.cvUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 font-mono text-xs text-lime border border-lime/40 px-4 py-2.5 rounded-lg hover:bg-lime/10 transition"
+                  className="inline-flex items-center gap-2 font-display text-xs font-medium tracking-widest uppercase text-white/40 border border-white/[0.1] px-6 py-3.5 hover:border-white/25 hover:text-white transition-colors duration-200"
                 >
-                  <Download size={14} /> Download CV
+                  <Download size={12} /> Résumé
                 </a>
-              )}
+              ) : null}
             </div>
 
-            <div className="flex items-center gap-4 mt-5">
-              <span className="font-mono text-xs text-green-300 flex items-center gap-1">
-                <MapPin size={13} />
+            {/* Social row */}
+            <div className="flex items-center gap-6">
+              <span className="font-mono text-[10px] text-white/25 flex items-center gap-1.5 tracking-wide">
+                <MapPin size={10} />
                 {s.location || 'Moratuwa, LK'}
               </span>
-              <div className="flex items-center gap-3 text-green-300">
+              <div className="flex items-center gap-4 text-white/25">
                 {s.githubUrl && (
-                  <a href={s.githubUrl} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                    <Github size={17} className="hover:text-em transition" />
+                  <a href={s.githubUrl} target="_blank" rel="noopener noreferrer"
+                     aria-label="GitHub" className="hover:text-em transition-colors">
+                    <Github size={15} />
                   </a>
                 )}
                 {s.linkedinUrl && (
-                  <a href={s.linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                    <Linkedin size={17} className="hover:text-em transition" />
+                  <a href={s.linkedinUrl} target="_blank" rel="noopener noreferrer"
+                     aria-label="LinkedIn" className="hover:text-em transition-colors">
+                    <Linkedin size={15} />
                   </a>
                 )}
                 {s.email && (
-                  <a href={`mailto:${s.email}`} aria-label="Email">
-                    <Mail size={17} className="hover:text-em transition" />
+                  <a href={`mailto:${s.email}`} aria-label="Email"
+                     className="hover:text-em transition-colors">
+                    <Mail size={15} />
                   </a>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Right — hex photo */}
-          <div className="flex-shrink-0 flex flex-col items-center gap-3">
-            <div className="relative w-40 h-44 md:w-48 md:h-52">
-              {/* Outer ring */}
-              <div
-                className="absolute -inset-2 border border-lime/40"
-                style={{ clipPath: 'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)' }}
-              />
-              {/* Inner hex */}
-              <div
-                className="absolute inset-0 bg-bg3 border border-em/60 flex items-center justify-center overflow-hidden"
-                style={{ clipPath: 'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)' }}
-              >
-                {s.avatarUrl ? (
-                  <Image
-                    src={s.avatarUrl}
-                    alt={s.name || 'Asiri'}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                ) : (
-                  <span className="font-display text-4xl font-extrabold text-em">AH</span>
-                )}
+          {/* RIGHT — frameless photo */}
+          <div className="flex-shrink-0 relative w-52 md:w-64 lg:w-80">
+            {/* Glow behind photo */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'radial-gradient(ellipse at 50% 60%, rgba(16,185,129,0.12) 0%, rgba(34,211,238,0.06) 40%, transparent 70%)',
+                transform: 'scale(1.5)',
+              }}
+            />
+
+            {s.avatarUrl ? (
+              <div className="relative w-full" style={{ aspectRatio: '3/4' }}>
+                <Image
+                  src={s.avatarUrl}
+                  alt={s.name || 'Asiri'}
+                  fill
+                  className="object-cover object-top photo-fade"
+                  priority
+                />
               </div>
-              {/* Badge */}
-              <span className="absolute -bottom-1 -right-3 font-mono text-[10px] text-lime bg-bg3 border border-lime/40 rounded-lg px-2 py-1">
-                {s.avatarBadge || 'UoM · CS'}
-              </span>
-            </div>
+            ) : (
+              <div
+                className="relative w-full flex flex-col items-center justify-center select-none"
+                style={{ aspectRatio: '3/4' }}
+              >
+                <span
+                  className="font-display font-black leading-none"
+                  style={{ fontSize: 'clamp(5rem, 14vw, 9rem)', letterSpacing: '-0.04em', color: 'rgba(255,255,255,0.04)' }}
+                >
+                  A<span style={{ color: 'rgba(16,185,129,0.15)' }}>H</span>
+                </span>
+                <p className="font-mono text-[10px] tracking-widest uppercase text-white/15 mt-2">
+                  set avatar in admin
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Status terminal */}
+        {/* ── Status terminal ── */}
         {updates && updates.length > 0 && (
-          <div className="mt-8 mb-12 bg-white/[0.03] border border-em/20 rounded-xl overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-em/15 bg-white/[0.02]">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
-              <span className="w-2.5 h-2.5 rounded-full bg-em/80" />
-              <span className="font-mono text-xs text-gray-500 ml-2">status — live from admin</span>
+          <div className="mt-0 mb-16 border border-white/[0.07] bg-white/[0.02] overflow-hidden max-w-lg">
+            {/* Terminal bar */}
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/[0.05] bg-white/[0.01]">
+              <span className="w-2 h-2 rounded-full bg-red-500/50" />
+              <span className="w-2 h-2 rounded-full bg-amber-400/50" />
+              <span className="w-2 h-2 rounded-full bg-em/60" />
+              <span className="font-mono text-[10px] text-white/20 ml-3 tracking-widest uppercase">
+                status.log — live
+              </span>
             </div>
-            <div className="px-4 py-3 font-mono text-xs leading-7">
-              <div>
-                <span className="text-lime">$</span>{' '}
-                <span className="text-white">asiri --status</span>
+            <div className="px-4 py-4 font-mono text-xs leading-7">
+              <div className="mb-1">
+                <span className="text-em">$</span>{' '}
+                <span className="text-white/60">asiri --status --verbose</span>
               </div>
               {updates.slice(0, 4).map(u => (
                 <div key={u._id}>
                   <span className={TYPE_COLORS[u.type] || 'text-em'}>
                     ▸ {TYPE_LABELS[u.type] || u.type}
                   </span>{' '}
-                  <span className="text-gray-300">{u.title.toLowerCase()}</span>{' '}
-                  <span className="text-gray-600">· {u.date}</span>
+                  <span className="text-white/50">{u.title.toLowerCase()}</span>{' '}
+                  <span className="text-white/20">· {u.date}</span>
                 </div>
               ))}
-              <div>
-                <span className="text-lime">$</span>{' '}
-                <span className="text-green-400 animate-blink">▌</span>
+              <div className="mt-1">
+                <span className="text-em">$</span>{' '}
+                <span className="text-cyan animate-blink">▌</span>
               </div>
             </div>
           </div>
         )}
+
       </div>
     </section>
   );
